@@ -3,8 +3,8 @@ import concurrent.futures
 import numpy as np
 
 # Open the video file for capturing frames
-# cap = cv2.VideoCapture("C:\\Users\\bodya\\OneDrive\\Desktop\\New folder\\test.mp4")
-cap = cv2.VideoCapture("C:\\Users\\bodya\\OneDrive\\Desktop\\New folder\\test3.mp4")
+# cap = cv2.VideoCapture("test.mp4")
+cap = cv2.VideoCapture("test3.mp4")
 # cap = cv2.VideoCapture(0)
 cap.set(3, 480)  # set width
 cap.set(4, 640)  # set height
