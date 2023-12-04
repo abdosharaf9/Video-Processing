@@ -11,7 +11,7 @@ def merge_video_with_audio(video_path_without_audio, video_path_with_audio, outp
     video_with_audio = video_without_audio.set_audio(audio_clip)
     
     # Write the merged video to the output path
-    video_with_audio.write_videofile(output_path, codec='libx264', audio_codec='aac', bitrate='11496k')
+    video_with_audio.write_videofile(output_path, codec='libx264', audio_codec='aac', bitrate='1000k')
     
     # Close the video clips
     video_without_audio.close()
@@ -19,7 +19,7 @@ def merge_video_with_audio(video_path_without_audio, video_path_with_audio, outp
     audio_clip.close()
 
 # Replace 'video1.mp4', 'video2.mp4', and 'output_video.mp4' with your actual file paths
-video_path_without_audio = "C:\\Users\\ziad2\\Desktop\\Video-Processing-main\\output without audio.mp4"
-video_path_with_audio = "C:\\Users\\ziad2\\Desktop\\Video-Processing-main\\test.mp4"
-output_video_path = "C:\\Users\\ziad2\\Desktop\\Video-Processing-main\\output with audio.mp4"
+video_path_without_audio = "filtered video.mp4"
+video_path_with_audio = "videos/test2.mp4"
+output_video_path = "output with audio.mp4"
 merge_video_with_audio(video_path_without_audio, video_path_with_audio, output_video_path)

@@ -1,16 +1,10 @@
 import cv2
 import customtkinter as ctk
+import detection
+from options import Options
 from tkinter import filedialog
-from enum import Enum
-
-class Options(Enum):
-    FACE = 1,
-    AGE = 2,
-    GENDER = 3,
-    FILTERS = 4
 
 
-face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 options_list: list[Options] = []
 
 
@@ -32,77 +26,26 @@ def open_files():
     fps = int(cap.get(cv2.CAP_PROP_FPS))
     width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    fourcc = cv2.VideoWriter_fourcc(*'XVID')
-    output = cv2.VideoWriter(output_path.get(), fourcc, fps, (width, height), isColor=False)
-    return cap, output
-
-
-def process_frames(video: cv2.VideoCapture, output: cv2.VideoWriter):
-    while True:
-        ret, frame = video.read()
-        
-        if not ret: break
-        if cv2.waitKey(1) & 0xFF == ord('q'): break
-        
-        gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        cv2.imshow("Real Time Video Processing", gray_frame)
-        output.write(gray_frame)
-        
-    video.release()
-    output.release()
-    
-    cv2.destroyAllWindows()
-    is_processing = False
+    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    # fourcc = cv2.VideoWriter_fourcc(*'XVID')
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+    output = cv2.VideoWriter(output_path.get(), fourcc, fps, (width, height))
+    return cap, fps, total_frames, output
     
 
-def set_user_options():
-    options_list.append(Options.AGE)
-    options_list.append(Options.FACE)
-    options_list.append(Options.GENDER)
-    options_list.append(Options.FILTERS)
-    
-    
-def handle_face_check():
-    if Options.FACE in options_list:
-        options_list.remove(Options.FACE)
-        print(options_list)
+def handle_option_check(option: Options):
+    if option in options_list:
+        options_list.remove(option)
     else:
-        options_list.append(Options.FACE)
-        print(options_list)
-    
-    
-def handle_age_check():
-    if Options.AGE in options_list:
-        options_list.remove(Options.AGE)
-        print(options_list)
-    else:
-        options_list.append(Options.AGE)
-        print(options_list)
-    
-    
-def handle_gender_check():
-    if Options.GENDER in options_list:
-        options_list.remove(Options.GENDER)
-        print(options_list)
-    else:
-        options_list.append(Options.GENDER)
-        print(options_list)
-    
-    
-def handle_filters_check():
-    if Options.FILTERS in options_list:
-        options_list.remove(Options.FILTERS)
-        print(options_list)
-    else:
-        options_list.append(Options.FILTERS)
-        print(options_list)
-
+        options_list.append(option)
+    print(options_list)
 
 
 def start_processing():
     if input_path.get() != None and output_path.get() != None:
-        video, output = open_files()
-        process_frames(video, output)
+        video, fps, total_frames, output = open_files()
+        detection.parallel_process_video_each_sec(video=video, fps = fps, total_frames= total_frames, output=output, selected_options_list= options_list)
+        window.destroy()
 
 
 
@@ -113,7 +56,7 @@ def start_processing():
 
 window = ctk.CTk()
 window.title("Video Processing")
-window.geometry("700x450")
+window.geometry("650x700")
 window.resizable(width=False, height=False)
 
 frame_1 = ctk.CTkFrame(master=window, width=500, height=300)
@@ -164,26 +107,49 @@ options_frame.pack(pady=8, padx=60, fill="both", expand=True)
 options_frame.grid_columnconfigure(index=0, weight=1)
 options_frame.grid_columnconfigure(index=1, weight=1)
 
-face_cb = ctk.CTkCheckBox(master= options_frame, text= "Face Detection", border_width=1, command=handle_face_check)
-face_cb.grid(pady=14, row=0, column=0, sticky="w")
+# Filters
+unsharp_masking_cb = ctk.CTkCheckBox(master= options_frame, text= "Unsharp Masking", border_width=1, command=lambda: handle_option_check(Options.UNSHARPEN))
+unsharp_masking_cb.grid(pady=8, row=0, column=0, sticky="w")
 
-age_cb = ctk.CTkCheckBox(master= options_frame, text= "Age Detection", border_width=1, command=handle_age_check)
-age_cb.grid(pady=14, row=0, column=1, sticky="w")
+blur_cb = ctk.CTkCheckBox(master= options_frame, text= "Blur", border_width=1, command=lambda: handle_option_check(Options.BLUR))
+blur_cb.grid(pady=8, row=1, column=0, sticky="w")
 
-gender_cb = ctk.CTkCheckBox(master= options_frame, text= "Gender Detection", border_width=1, command=handle_gender_check)
-gender_cb.grid(pady=14, row=1, column=0, sticky="w")
+edge_detection_cb = ctk.CTkCheckBox(master= options_frame, text= "Edge Detection (Laplacian)", border_width=1, command=lambda: handle_option_check(Options.EDGE_DETECTION))
+edge_detection_cb.grid(pady=8, row=2, column=0, sticky="w")
 
-filter_cb = ctk.CTkCheckBox(master= options_frame, text= "Add Filters", border_width=1, command=handle_filters_check)
-filter_cb.grid(pady=14, row=1, column=1, sticky="w")
+sharpen_cb = ctk.CTkCheckBox(master= options_frame, text= "Sharpen", border_width=1, command=lambda: handle_option_check(Options.SHARPEN))
+sharpen_cb.grid(pady=8, row=3, column=0, sticky="w")
+
+emboss_cb = ctk.CTkCheckBox(master= options_frame, text= "Emboss", border_width=1, command=lambda: handle_option_check(Options.EMBOSS))
+emboss_cb.grid(pady=8, row=4, column=0, sticky="w")
+
+gaussian_blur_cb = ctk.CTkCheckBox(master= options_frame, text= "Gaussian Blur", border_width=1, command=lambda: handle_option_check(Options.GAUSSIAN_BLUR))
+gaussian_blur_cb.grid(pady=8, row=5, column=0, sticky="w")
+
+black_and_white_cb = ctk.CTkCheckBox(master= options_frame, text= "Black And White", border_width=1, command=lambda: handle_option_check(Options.BLACK_AND_WHITE))
+black_and_white_cb.grid(pady=8, row=6, column=0, sticky="w")
+
+night_vision_filter_cb = ctk.CTkCheckBox(master= options_frame, text= "Night Vision (Cool)", border_width=1, command=lambda: handle_option_check(Options.NIGHT_VISION))
+night_vision_filter_cb.grid(pady=8, row=7, column=0, sticky="w")
+
+sepia_cb = ctk.CTkCheckBox(master= options_frame, text= "Sepia (Warm)", border_width=1, command=lambda: handle_option_check(Options.SEPIA))
+sepia_cb.grid(pady=8, row=8, column=0, sticky="w")
+
+
+# Detections
+face_cb = ctk.CTkCheckBox(master= options_frame, text= "Face Detection", border_width=1, command=lambda: handle_option_check(Options.FACE_DETECTION))
+face_cb.grid(pady=8, row=0, column=1, sticky="w")
+
+age_cb = ctk.CTkCheckBox(master= options_frame, text= "Age Detection", border_width=1, command=lambda: handle_option_check(Options.AGE))
+age_cb.grid(pady=8, row=1, column=1, sticky="w")
+
+gender_cb = ctk.CTkCheckBox(master= options_frame, text= "Gender Detection", border_width=1, command=lambda: handle_option_check(Options.GENDER))
+gender_cb.grid(pady=8, row=2, column=1, sticky="w")
 
 
 # Start Button
 start_btn = ctk.CTkButton(master= frame_1, text= "Start", command=start_processing, font=("Roboto", 16), height=30)
-start_btn.pack(padx=100, pady=20, fill="x")
+start_btn.pack(padx=100, pady=20)
 
-
-# choose_file_path()
-# choose_output_path()
-# set_user_options()
 
 window.mainloop()

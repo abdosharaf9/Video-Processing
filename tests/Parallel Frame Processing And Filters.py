@@ -43,7 +43,7 @@ def emboss(frame):
     processed_frame = cv2.filter2D(frame, -1, kernel)
     return processed_frame
 
-# Gaussian  Blur Kernel
+# Gaussian Blur Kernel
 def gaussian_blur(frame):
     kernel = np.array([[1/16, 1/8, 1/16],
                        [1/8, 1/4, 1/8],
@@ -58,7 +58,7 @@ def black_and_white(frame):
     return processed_frame
 
 # Night Vision Kernel (Cool)
-def night_vision_filter(frame):
+def night_vision(frame):
     kernel = np.array([[0.393, 0.769, 0.189],
                        [0.349, 0.686, 0.168],
                        [0.272, 0.534, 0.131]])
@@ -76,15 +76,15 @@ def sepia(frame):
 def process_frame(frame):
     # Apply your processing scheme to the frame
     processed_frame=frame
-    #processed_frame = unsharp_masking(processed_frame)
-    #processed_frame = blur(processed_frame)
-    #processed_frame = edge_detection(processed_frame)
-    #processed_frame = sharpen(processed_frame)
-    #processed_frame = emboss(processed_frame)
-    #processed_frame = gaussian_blur(processed_frame)
-    #processed_frame = black_and_white(processed_frame) 
-    #processed_frame = night_vision_filter(processed_frame) 
-    #processed_frame = sepia(processed_frame)
+    processed_frame = unsharp_masking(processed_frame)
+    processed_frame = blur(processed_frame)
+    processed_frame = edge_detection(processed_frame)
+    processed_frame = sharpen(processed_frame)
+    processed_frame = emboss(processed_frame)
+    processed_frame = gaussian_blur(processed_frame)
+    processed_frame = black_and_white(processed_frame)
+    processed_frame = night_vision(processed_frame)
+    processed_frame = sepia(processed_frame)
     return processed_frame
 
 def parallel_process_video_all_frames(input_path, output_path):
@@ -141,7 +141,7 @@ def parallel_process_video_each_sec(input_path, output_path):
     cap.release()
 
 # Example usage
-input_video_path = "C:\\Users\\ziad2\\Desktop\\Video-Processing-main\\test.mp4"
-output_video_path = "C:\\Users\\ziad2\\Desktop\\Video-Processing-main\\output without audio.mp4"
+input_video_path = "videos/test.mp4"
+output_video_path = "filtered video.mp4"
 #parallel_process_video_all_frames(input_video_path, output_video_path)
 parallel_process_video_each_sec(input_video_path, output_video_path)
