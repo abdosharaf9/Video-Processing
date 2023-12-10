@@ -35,9 +35,11 @@ def process_face(face):
 
 
 def process_frame(frame):
-    gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)    
+    gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)   
+    gray_frame = cv2.equalizeHist(gray_frame) 
     faces = face_cascade.detectMultiScale(image=gray_frame, scaleFactor=1.1, minNeighbors=7)
-
+    
+    frame = filters.filter_frame(frame= frame, options_list=options_list)
     futures = []
 
     # Process each detected face
@@ -54,8 +56,6 @@ def process_frame(frame):
         gender, age = future
         overlay_text = "%s %s" % (gender, age)
         frame = cv2.putText(frame, overlay_text, (x, y), font, 1, (255, 255, 255), 2, cv2.LINE_AA)
-    
-    frame = filters.filter_frame(frame= frame, options_list=options_list)
         
     return frame
 

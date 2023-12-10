@@ -1,6 +1,7 @@
 import cv2
 import customtkinter as ctk
 import detection
+import merge_audio
 from options import Options
 from tkinter import filedialog
 
@@ -14,7 +15,7 @@ def choose_file_path():
 
 
 def choose_output_path():
-    output_path.set(filedialog.askdirectory(title="Choose Output Directory") + "/filtered video.mp4")
+    output_path.set(filedialog.askdirectory(title="Choose Output Directory") + "/filtered video temp.mp4")
     print(f"Choosen output path = {output_path.get()}")
     
     
@@ -44,8 +45,11 @@ def handle_option_check(option: Options):
 def start_processing():
     if input_path.get() != None and output_path.get() != None:
         video, fps, total_frames, output = open_files()
+        print("Loading.......")
         detection.parallel_process_video_each_sec(video=video, fps = fps, total_frames= total_frames, output=output, selected_options_list= options_list)
-        window.destroy()
+        merge_audio.merge_audio_with_video(output_path.get(), input_path.get(), output_path.get().replace(" temp.mp4", ".mp4"))
+        print("Finished")
+        #window.destroy()
 
 
 
