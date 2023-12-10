@@ -1,5 +1,6 @@
 import cv2
 import customtkinter as ctk
+import tkinter as tk
 import detection
 import merge_audio
 from options import Options
@@ -37,8 +38,18 @@ def open_files():
 def handle_option_check(option: Options):
     if option in options_list:
         options_list.remove(option)
+        
+        if option == Options.FACE_DETECTION:
+            age_cb.configure(state = tk.DISABLED, variable = tk.BooleanVar())
+            gender_cb.configure(state = tk.DISABLED, variable = tk.BooleanVar())
+            if Options.AGE in options_list: options_list.remove(Options.AGE)
+            if Options.GENDER in options_list: options_list.remove(Options.GENDER)
     else:
         options_list.append(option)
+        
+        if option == Options.FACE_DETECTION:
+            age_cb.configure(state = tk.NORMAL)
+            gender_cb.configure(state = tk.NORMAL)
     print(options_list)
 
 
@@ -144,10 +155,10 @@ sepia_cb.grid(pady=8, row=8, column=0, sticky="w")
 face_cb = ctk.CTkCheckBox(master= options_frame, text= "Face Detection", border_width=1, command=lambda: handle_option_check(Options.FACE_DETECTION))
 face_cb.grid(pady=8, row=0, column=1, sticky="w")
 
-age_cb = ctk.CTkCheckBox(master= options_frame, text= "Age Detection", border_width=1, command=lambda: handle_option_check(Options.AGE))
+age_cb = ctk.CTkCheckBox(master= options_frame, text= "Age Detection", border_width=1, command=lambda: handle_option_check(Options.AGE), state=tk.DISABLED)
 age_cb.grid(pady=8, row=1, column=1, sticky="w")
 
-gender_cb = ctk.CTkCheckBox(master= options_frame, text= "Gender Detection", border_width=1, command=lambda: handle_option_check(Options.GENDER))
+gender_cb = ctk.CTkCheckBox(master= options_frame, text= "Gender Detection", border_width=1, command=lambda: handle_option_check(Options.GENDER), state=tk.DISABLED)
 gender_cb.grid(pady=8, row=2, column=1, sticky="w")
 
 

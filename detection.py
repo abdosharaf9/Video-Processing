@@ -21,41 +21,50 @@ def process_face(face):
     # Create a blob from the face image for input to the pre-trained models
     blob = cv2.dnn.blobFromImage(face, 1, (227, 227), MODEL_MEAN_VALUES, swapRB=False)
 
+    output = ""
+    
     # Predict gender
-    gender_net.setInput(blob)
-    gender_preds = gender_net.forward()
-    gender = gender_list[gender_preds[0].argmax()]
+    if Options.GENDER in options_list:
+        gender_net.setInput(blob)
+        gender_preds = gender_net.forward()
+        gender = gender_list[gender_preds[0].argmax()]
+        output += f"{gender} "
 
     # Predict age
-    age_net.setInput(blob)
-    age_preds = age_net.forward()
-    age = age_list[age_preds[0].argmax()]
+    if Options.AGE in options_list:
+        age_net.setInput(blob)
+        age_preds = age_net.forward()
+        age = age_list[age_preds[0].argmax()]
+        output += age
 
-    return gender, age
+    return output
 
 
 def process_frame(frame):
-    gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)   
-    gray_frame = cv2.equalizeHist(gray_frame) 
-    faces = face_cascade.detectMultiScale(image=gray_frame, scaleFactor=1.1, minNeighbors=7)
+    if Options.FACE_DETECTION in options_list:
+        gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)   
+        gray_frame = cv2.equalizeHist(gray_frame) 
+        faces = face_cascade.detectMultiScale(image=gray_frame, scaleFactor=1.1, minNeighbors=7)
     
     frame = filters.filter_frame(frame= frame, options_list=options_list)
-    futures = []
+    
+    if Options.FACE_DETECTION in options_list:
+        futures = []
 
-    # Process each detected face
-    for (x, y, w, h) in faces:
-        # Draw a rectangle around the face
-        frame = cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 255, 0), 2)
-        face_img = frame[y:y + h, x:x + w].copy()
+        # Process each detected face
+        for (x, y, w, h) in faces:
+            # Draw a rectangle around the face
+            frame = cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 255, 0), 2)
+            face_img = frame[y:y + h, x:x + w].copy()
 
-        # Process face image and detect age & gender
-        futures.append(process_face(face_img))
+            # Process face image and detect age & gender
+            if Options.AGE in options_list or Options.GENDER in options_list:
+                futures.append(process_face(face_img))
 
-    # Retrieve results from the futures
-    for future, (x, y, w, h) in zip(futures, faces):
-        gender, age = future
-        overlay_text = "%s %s" % (gender, age)
-        frame = cv2.putText(frame, overlay_text, (x, y), font, 1, (255, 255, 255), 2, cv2.LINE_AA)
+        # Retrieve results from the futures
+        if Options.AGE in options_list or Options.GENDER in options_list:
+            for future, (x, y, w, h) in zip(futures, faces):
+                frame = cv2.putText(frame, future, (x, y), font, 1, (255, 255, 255), 2, cv2.LINE_AA)
         
     return frame
 
