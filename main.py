@@ -5,7 +5,7 @@ import detection
 import merge_audio
 from options import Options
 from tkinter import filedialog
-
+import threading
 
 options_list: list[Options] = []
 
@@ -52,6 +52,10 @@ def handle_option_check(option: Options):
             gender_cb.configure(state = tk.NORMAL)
     print(options_list)
 
+#define and call the thread
+def start_processing_thread():
+    thread = threading.Thread(target=start_processing)
+    thread.start()
 
 def start_processing():
     if input_path.get() != None and output_path.get() != None:
@@ -163,7 +167,7 @@ gender_cb.grid(pady=8, row=2, column=1, sticky="w")
 
 
 # Start Button
-start_btn = ctk.CTkButton(master= frame_1, text= "Start", command=start_processing, font=("Roboto", 16), height=30)
+start_btn = ctk.CTkButton(master= frame_1, text= "Start", command=start_processing_thread, font=("Roboto", 16), height=30)
 start_btn.pack(padx=100, pady=20)
 
 
