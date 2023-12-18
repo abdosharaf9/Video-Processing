@@ -59,11 +59,13 @@ def start_processing_thread():
 
 def start_processing():
     if input_path.get() != None and output_path.get() != None:
+        start_btn.configure(state=tk.DISABLED,text="Processing..")
         video, fps, total_frames, output = open_files()
         print("Loading.......")
         detection.parallel_process_video_each_sec(video=video, fps = fps, total_frames= total_frames, output=output, selected_options_list= options_list)
         merge_audio.merge_audio_with_video(output_path.get(), input_path.get(), output_path.get().replace(" temp.mp4", ".mp4"))
         print("Finished")
+        start_btn.configure(state=tk.ACTIVE,text="Start")
         #window.destroy()
 
 
