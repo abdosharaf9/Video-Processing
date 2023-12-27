@@ -51,11 +51,28 @@ def handle_option_check(option: Options):
             age_cb.configure(state = tk.NORMAL)
             gender_cb.configure(state = tk.NORMAL)
     print(options_list)
+    
+
+def preview():
+    preview_btn.configure(state=tk.DISABLED,text="Processing..")
+    image = cv2.imread("test.jpg")
+    frame = detection.process_preview(image, options_list)
+    resized_frame = cv2.resize(frame, (750, 1000))
+    cv2.imshow("Preview", resized_frame)
+    cv2.waitKey(0)
+    preview_btn.configure(state=tk.ACTIVE,text="Preview")
+    
+
+def start_preview_thread():
+    thread = threading.Thread(target=preview)
+    thread.start()
+
 
 #define and call the thread
 def start_processing_thread():
     thread = threading.Thread(target=start_processing)
     thread.start()
+
 
 def start_processing():
     if input_path.get() != None and output_path.get() != None:
@@ -168,9 +185,20 @@ gender_cb = ctk.CTkCheckBox(master= options_frame, text= "Gender Detection", bor
 gender_cb.grid(pady=8, row=2, column=1, sticky="w")
 
 
+# Buttons
+buttons_frame = ctk.CTkFrame(master=frame_1, fg_color="transparent")
+buttons_frame.pack(pady=8, padx=60, fill="both", expand=True)
+buttons_frame.grid_columnconfigure(index=0, weight=1)
+buttons_frame.grid_columnconfigure(index=1, weight=1)
+
 # Start Button
-start_btn = ctk.CTkButton(master= frame_1, text= "Start", command=start_processing_thread, font=("Roboto", 16), height=30)
-start_btn.pack(padx=100, pady=20)
+start_btn = ctk.CTkButton(master= buttons_frame, text= "Start", command=start_processing_thread, font=("Roboto", 16), height=30)
+start_btn.grid(row=0, column=0)
+
+
+# Preview Button
+preview_btn = ctk.CTkButton(master= buttons_frame, text= "Preview", command=start_preview_thread, font=("Roboto", 16), height=30)
+preview_btn.grid(row=0, column=1)
 
 
 window.mainloop()

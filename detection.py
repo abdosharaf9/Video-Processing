@@ -90,3 +90,12 @@ def parallel_process_video_each_sec(video: cv2.VideoCapture, fps: int, total_fra
         
     video.release()
     output.release()
+    options_list = []
+    
+
+def process_preview(frame, selected_options_list: list[Options]):
+    global options_list
+    options_list = selected_options_list
+    processed_preview = process_frame(frame=frame)
+    options_list = []
+    return processed_preview
