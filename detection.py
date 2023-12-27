@@ -46,7 +46,7 @@ def process_frame(frame):
         gray_frame = cv2.equalizeHist(gray_frame) 
         faces = face_cascade.detectMultiScale(image=gray_frame, scaleFactor=1.1, minNeighbors=7)
     
-    frame = filters.filter_frame(frame= frame, options_list=options_list)
+    filtered_frame = filters.filter_frame(frame= frame, options_list=options_list)
     
     if Options.FACE_DETECTION in options_list:
         futures = []
@@ -54,7 +54,7 @@ def process_frame(frame):
         # Process each detected face
         for (x, y, w, h) in faces:
             # Draw a rectangle around the face
-            frame = cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 255, 0), 2)
+            filtered_frame = cv2.rectangle(filtered_frame, (x, y), (x + w, y + h), (255, 255, 0), 2)
             face_img = frame[y:y + h, x:x + w].copy()
 
             # Process face image and detect age & gender
@@ -64,9 +64,9 @@ def process_frame(frame):
         # Retrieve results from the futures
         if Options.AGE in options_list or Options.GENDER in options_list:
             for future, (x, y, w, h) in zip(futures, faces):
-                frame = cv2.putText(frame, future, (x, y), font, 1, (255, 255, 255), 2, cv2.LINE_AA)
+                filtered_frame = cv2.putText(filtered_frame, future, (x, y), font, 1, (255, 255, 255), 2, cv2.LINE_AA)
         
-    return frame
+    return filtered_frame
 
 
 def parallel_process_video_each_sec(video: cv2.VideoCapture, fps: int, total_frames: int, output: cv2.VideoWriter, selected_options_list: list[Options]):
